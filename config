@@ -1,0 +1,3 @@
+{ population = 10
+, startDate = "Date { dateYear = 1996, dateMonth = August, dateDay = 19 }"
+}
