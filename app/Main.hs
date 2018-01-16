@@ -3,9 +3,9 @@
 module Main where
 
 import qualified Dhall
-import qualified Text.Read as TR (read)
 import qualified Data.Text as T
-import Time.Types (Date)
+import Data.Time.Format (ParseTime, TimeLocale, parseTimeOrError, defaultTimeLocale, buildTime)
+import Data.Time.Calendar (Day)
 
 import Lib (loadConfig, generateImport)
 
@@ -20,5 +20,5 @@ main = do
   config <- Dhall.input Dhall.auto "./config"
   let
     pop = fromIntegral $ population config
-    sd = TR.read . T.unpack $ startDate config
+    sd = parseTimeOrError True defaultTimeLocale "%F" $ T.unpack $ startDate config
     in generateImport $ loadConfig pop sd
