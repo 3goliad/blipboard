@@ -49,3 +49,9 @@
             "middlename"
             "lastname"
             (void))))
+
+(with-output-to-file "out.csv"
+  (lambda ()
+    (begin (print-header)
+           (for ([i 10])
+             (print-worker (gen-worker))))))
