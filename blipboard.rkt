@@ -2,32 +2,17 @@
 #lang racket/base
 
 (require racket/cmdline)
+(require racket/function)
 (require "generate.rkt")
 
-(define arg
-  (command-line
-   #:program "blipboard"
-   #:args (size)
-   size))
+(command-line
+ #:program "blipboard"
+ #:once-any
+ [("--size") size "Select the size (small, medium, large)" (gen-size size)])
 
-(parameterize ([simulation-size arg])
-  (generate-organizations)
-  (define cycles (* 20 (case (simulation-size)
-                         [("small") 10]
-                         [("medium") 100]
-                         [("large") 1000])))
-  (with-output-to-file "out-1.csv"
-    (lambda ()
-      (print-header)
-      (for ([i cycles])
-        (print-worker (gen-worker empty-employment))
-        (print-worker (gen-worker (gen-employment #f #f)))
-        (print-worker (gen-worker (gen-employment #t #f)))))
-    #:exists 'replace)
-  (with-output-to-file "out-2.csv"
-    (lambda ()
-      (print-header)
-      (for ([i cycles])
-        (print-worker (gen-worker (gen-employment #f #t)))
-        (print-worker (gen-worker (gen-employment #t #t)))))
-    #:exists 'replace))
+(run-gen-stages
+ (λ (stage-name stage-header stage-data)
+   (with-output-to-file (string-append stage-name ".csv")
+     (thunk (display stage-header)
+            (for ([datum stage-data]) (display datum)))
+     #:exists 'replace)))
