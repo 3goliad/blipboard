@@ -51,9 +51,7 @@
                          (case i [(0) "National "] [(1) "Regional "] [(2) "Local "])
                          id))))
     (append partial-name (build-list (- 3 (length partial-name))
-                               (const "")))
-    )
-  )
+                                     (const "")))))
 
 (define (gen-jobs)
   (make-hash (map (λ (org)
@@ -75,13 +73,13 @@
 
 (define (fire-worker worker)
   (let* ((name (entity-name worker))
-        (id (entity-external-id worker))
-        (n2 (person-secondary-name worker))
-        (n3 (person-tertiary-name worker))
-        (emp (person-employment worker))
-        (sd (case (employment-start-date emp)
-              [("") start-date]
-              [else (iso8601->date (employment-start-date emp))])))
+         (id (entity-external-id worker))
+         (n2 (person-secondary-name worker))
+         (n3 (person-tertiary-name worker))
+         (emp (person-employment worker))
+         (sd (case (employment-start-date emp)
+               [("") start-date]
+               [else (iso8601->date (employment-start-date emp))])))
     (person name id n2 n3 (employment (employment-employer emp)
                                       (employment-department emp)
                                       (employment-sub-department emp)
@@ -143,26 +141,26 @@
 
 (define (print-header)
   (string-append
-             "First Name, Middle Name, Last Name, "
-             "TESTDATA ID, Employer, Department, "
-             "Subdepartment, Start Date, Date Ended\n"))
+   "First Name, Middle Name, Last Name, "
+   "TESTDATA ID, Employer, Department, "
+   "Subdepartment, Start Date, Date Ended\n"))
 
 (define (print-worker worker)
   (string-join
-             (list
-              (entity-name worker)
-              (person-secondary-name worker)
-              (person-tertiary-name worker)
-              (entity-external-id worker)
-              (employment-employer
-               (person-employment worker))
-              (employment-department
-               (person-employment worker))
-              (employment-sub-department
-               (person-employment worker))
-              (employment-start-date
-               (person-employment worker))
-              (employment-end-date
-               (person-employment worker)))
-             ","
-             #:after-last "\n"))
+   (list
+    (entity-name worker)
+    (person-secondary-name worker)
+    (person-tertiary-name worker)
+    (entity-external-id worker)
+    (employment-employer
+     (person-employment worker))
+    (employment-department
+     (person-employment worker))
+    (employment-sub-department
+     (person-employment worker))
+    (employment-start-date
+     (person-employment worker))
+    (employment-end-date
+     (person-employment worker)))
+   ","
+   #:after-last "\n"))
