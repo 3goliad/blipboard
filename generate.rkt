@@ -1,9 +1,31 @@
 #lang racket
+
 (require gregor)
 (require gregor/period)
 
-(provide gen-size
-         run-gen-stages)
+(provide create-simulation
+         run-simulation
+         show-simulation)
+
+(define (create-simulation #:names names)
+  (hash "date" (today)
+        "generation" 1))
+
+(define (run-simulation sim)
+  (let ((current-date (hash-ref sim "date"))
+        (current-generation (hash-ref sim "generation")))
+    (hash-set* sim
+               "date" (+days current-date 1)
+               "generation" (+ current-generation 1))))
+
+(define (show-simulation sim)
+  (newline)
+  (display "Generation ")
+  (display (hash-ref sim "generation"))
+  (newline)
+  (display "The current date is: ")
+  (display (hash-ref sim "date"))
+  (newline))
 
 (struct entity (name external-id))
 (struct person entity (secondary-name tertiary-name employment))
