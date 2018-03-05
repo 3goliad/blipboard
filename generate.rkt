@@ -31,6 +31,7 @@
 (define (gen-org-ids)
   (let ((branches (cond-size #:sm '(1 3 2)
                              #:md '(4 6 3)
+                             #:flat '(1 1 98)
                              #:lg '(8 31 3)))
         (into-id (λ id-el (list (map (λ (x) (number->string (+ 1 x))) id-el)))))
     (for*/fold ([acc '()]) ([i (car branches)]
