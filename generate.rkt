@@ -39,27 +39,67 @@
          (generate-orgs))) ; orgs
 
 (define (run-simulation w)
-  (step-sim w 1))
+  (sim-step w 1))
 
-
-(define (step-world-people w step)
-  (define (step-person p)
-    (person (person-name p)
-            (+days (person-age p) step)))
+(define (people-step w step)
   (define people (world-people w))
-  (define new-people (map step-person people))
-  (define (died p)
+  (define (age-step p)
+    `(#:person ,(person-id p) #:age ,(days step)))
+  (define (died? p)
     (define age (period-ref (person-age p) 'years))
     (and (> age 65)
          (> (- 100 age)
             (random 100))))
-  (filter died new-people))
+  (define death-steps
+    (map (lambda (dead-person) '(#:person ,(person-id p) #:dead))
+         (filter died? people)))
+  (append (map age-step people) death-steps))
 
-(define (step-sim w step)
-  (world (+ (world-generation w) 1)
-         (+days (world-date w) step)
-         (step-world-people w step)
-         (world-orgs w)))
+(define (get-world-person w id)
+  (first (filter (λ (p) (equal? (person-id p) id))
+                 (world-people w))))
+
+(define (update-world-person w id p)
+  (add-world-person (delete-world-person w id) id p))
+
+(define (delete-world-person w id)
+  (struct-copy world w
+               [people (filter (λ (p) (not (eqv? id (person-id p))))(world-people w))]))
+
+(define (add-world-person w id p)
+  (struct-copy world w
+               [people (cons p (world-people w))]))
+
+(define (apply-change w change)
+  (define (apply-person-change id args)
+    (define p (get-world-person w id))
+    (match args
+      [(list #:dead)
+       (delete-world-person w id)]
+      [(list #:age value)
+       (update-world-person w id (struct-copy person p [age (period value (person-age p))]))]))
+  (match change
+    [(list-rest #:person id args)
+     (apply-person-change id args)]
+    [(list #:world #:increment-gen)
+     (struct-copy world w [generation (+ (world-generation w) 1)])]
+    [(list #:world #:advance-clock amount)
+     (struct-copy world w [date (+date-period (world-date w) amount)])]))
+
+(define (apply-world-changes w changes)
+  (for/fold ([cur-w w])
+      ([change changes])
+    (apply-change cur-w change)))
+
+(define (world-step w step)
+  `((#:world #:increment-gen)
+    (#:world #:advance-clock ,(days step))))
+
+(define (sim-step w step)
+  (apply-world-changes w
+   (append
+    (world-step w step)
+    (people-step w step))))
 
 (define (show-simulation w)
   (newline)
