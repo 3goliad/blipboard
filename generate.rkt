@@ -7,21 +7,26 @@
          run-simulation
          show-simulation)
 
-(struct person (name age))
+(define (gen-uuid)
+  (call-with-input-file "/proc/sys/kernel/random/uuid"
+    (lambda (in) (read-line in))))
+
+
+(struct person (id name age))
 
 (define (generate-people names)
   (define population (random 100))
   (define (random-name) (list-ref names (random 0 (length names))))
   (define (random-age) (years (random 18 99)))
-  (define (gen-person i) (person (random-name) (random-age)))
+  (define (gen-person i) (person (gen-uuid) (random-name) (random-age)))
   (build-list population gen-person))
 
 
-(struct org (name))
+(struct org (id name))
 
 (define (generate-orgs)
   (define org-population (random 10))
-  (define (gen-org i) (org (~a "Org #" i)))
+  (define (gen-org i) (org (gen-uuid) (~a "Org #" i)))
   (build-list org-population gen-org))
 
 
